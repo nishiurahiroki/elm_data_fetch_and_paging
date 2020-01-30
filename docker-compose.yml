@@ -6,7 +6,7 @@ services:
       ports:
         - 5432:5432
       volumes:
-        - ./postgres/init:/docker-entrypoint-initdb.d
+        - ./docker/db/initdb:/docker-entrypoint-initdb.d
       environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
@@ -16,7 +16,7 @@ services:
       user: postgres
 
     pgadmin4:
-      image: dpage/pgadmin4:3.3
+      image: dpage/pgadmin4:4.17
       container_name: pgadmin4
       ports:
         - 8080:80
@@ -26,4 +26,6 @@ services:
         PGADMIN_DEFAULT_EMAIL: root
         PGADMIN_DEFAULT_PASSWORD: root
       hostname: pgadmin4
+      depends_on:
+          - db
       restart: always
