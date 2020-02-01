@@ -1,7 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 
-const UserRepository = require('./src/repository/UserRepository.js')
+const { startServer } = require('./src/rest/api.js')
 
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
@@ -56,10 +56,7 @@ module.exports = {
         disableHostCheck: true,
         historyApiFallback: true,
         before(app) {
-          app.get("/test", function(req, res) {
-            UserRepository.createTableIfNotExists()
-            res.json({ result: "OK" })
-          })
+          startServer()
         }
     }
 };
