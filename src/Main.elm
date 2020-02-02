@@ -5,6 +5,8 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Url
+import Http
+import Task
 
 
 main : Program () Model Msg
@@ -22,11 +24,18 @@ main =
     onUrlRequest = LinkClicked
   }
 
+type alias Todo =
+  {
+    id : String,
+    content : String,
+    createData : String
+  }
 
 type alias Model =
   {
     key : Nav.Key,
-    url : Url.Url
+    url : Url.Url,
+    todoList : List Todo
   }
 
 
@@ -34,7 +43,8 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
   ({
     key = key,
-    url = url
+    url = url,
+    todoList = []
   }, Cmd.batch [
     Cmd.none
   ])
@@ -42,7 +52,8 @@ init flags url key =
 
 type Msg =
   LinkClicked Browser.UrlRequest |
-  UrlChanged Url.Url
+  UrlChanged Url.Url |
+  GetTodoListTask
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -54,6 +65,8 @@ update msg model =
     UrlChanged url ->
       (model, Cmd.none)
 
+    GetTodoListTask ->
+      (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
