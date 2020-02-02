@@ -57,7 +57,15 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div [] [ text "Hello! elm!" ]
+  div [] [
+    div [] [
+      text "TODO ID : ",
+      input [ type_ "input" ] []
+    ],
+    div [] [
+      button [] [ text "検索" ]
+    ]
+  ]
 
 
 subscriptions : Model -> Sub Msg
