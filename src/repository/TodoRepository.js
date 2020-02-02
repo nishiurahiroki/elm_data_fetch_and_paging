@@ -15,7 +15,7 @@ const getTodos = ({ limit = '', page = '', sort = '', orderBy = '' }) => {
   return new Promise((resolve, reject) => {
     client.query(queryStrings.join(' '), (err, res) => {
       resolve(err ? err.stack : res.rows)
-      client.end()
+      // client.end()
     })
   })
 }

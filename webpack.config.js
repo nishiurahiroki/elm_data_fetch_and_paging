@@ -3,6 +3,10 @@ const webpack = require("webpack");
 
 const { startServer } = require('./src/rest/api.js')
 
+const { getTodos } = require('./src/repository/TodoRepository.js')
+
+const bodyParser = require('body-parser')
+
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
@@ -56,7 +60,15 @@ module.exports = {
         disableHostCheck: true,
         historyApiFallback: true,
         before(app) {
-          startServer()
+          app.use(bodyParser.urlencoded({ extended : true }))
+          app.use(bodyParser.json())
+          app.get('/api/v1/todo', async (req, res) => {
+            // TODO parameter
+            const todos = await getTodos({})
+            res.json({
+              result : todos
+            })
+          })
         }
     }
 };

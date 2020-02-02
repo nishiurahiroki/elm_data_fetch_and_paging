@@ -4,9 +4,11 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Url
 import Http
-import Task
+import Json.Decode exposing (Decoder, field)
+import Task exposing (Task)
 
 
 main : Program () Model Msg
@@ -26,16 +28,22 @@ main =
 
 type alias Todo =
   {
-    id : String,
+    id : Int,
     content : String,
-    createData : String
+    create_date : String
+  }
+
+type alias ApiResult =
+  {
+    result : List Todo
   }
 
 type alias Model =
   {
     key : Nav.Key,
     url : Url.Url,
-    todoList : List Todo
+    todoList : List Todo,
+    fetchResult : Maybe String
   }
 
 
@@ -44,7 +52,8 @@ init flags url key =
   ({
     key = key,
     url = url,
-    todoList = []
+    todoList = [],
+    fetchResult = Nothing
   }, Cmd.batch [
     Cmd.none
   ])
@@ -53,7 +62,8 @@ init flags url key =
 type Msg =
   LinkClicked Browser.UrlRequest |
   UrlChanged Url.Url |
-  GetTodoListTask
+  GetTodoListTask |
+  GetTodoList (Result Http.Error ApiResult)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -66,7 +76,20 @@ update msg model =
       (model, Cmd.none)
 
     GetTodoListTask ->
-      (model, Cmd.none)
+      (model, Task.attempt GetTodoList fetchTodoTask)
+
+    GetTodoList result ->
+      case result of
+        Err _ ->
+          ({model | fetchResult = Just "fetch fail."}, Cmd.none)
+
+        Ok fetchResult ->
+          ({
+            model |
+              todoList = fetchResult.result,
+              fetchResult = Nothing
+          }, Cmd.none)
+
 
 view : Model -> Html Msg
 view model =
@@ -76,7 +99,24 @@ view model =
       input [ type_ "input" ] []
     ],
     div [] [
-      button [] [ text "検索" ]
+      button [ onClick GetTodoListTask ] [ text "検索" ]
+    ],
+    text <| Maybe.withDefault "" <| model.fetchResult,
+    table [] [
+      tr [] [
+        th [] [ text "id" ],
+        th [] [ text "内容" ],
+        th [] [ text "作成日時" ]
+      ],
+      tbody []
+        <| List.map (\todo ->
+            tr [] [
+              td [] [ text <| String.fromInt todo.id ],
+              td [] [ text todo.content ],
+              td [] [ text todo.create_date ]
+            ]
+           )
+        <| model.todoList
     ]
   ]
 
@@ -86,3 +126,54 @@ subscriptions model =
   Sub.batch [
     Sub.none
   ]
+
+
+apiReusltDecoder : Decoder ApiResult
+apiReusltDecoder =
+  Json.Decode.map ApiResult
+    (field "result" <| Json.Decode.list todoDecoder)
+
+
+todoDecoder : Decoder Todo
+todoDecoder =
+  Json.Decode.map3 Todo
+    (field "id" Json.Decode.int)
+    (field "content" Json.Decode.string)
+    (field "create_date" Json.Decode.string)
+
+
+fetchTodoTask : Task Http.Error ApiResult
+fetchTodoTask =
+  Http.task {
+    method = "GET",
+    headers = [],
+    url = "/api/v1/todo",
+    body = Http.emptyBody,
+    resolver = Http.stringResolver <| handleJsonResponse <| apiReusltDecoder,
+    timeout = Nothing
+  }
+
+
+handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
+handleJsonResponse decoder response =
+  case response of
+    Http.BadUrl_ url ->
+      Err (Http.BadUrl url)
+
+    Http.Timeout_ ->
+      Err Http.Timeout
+
+    Http.NetworkError_ ->
+      Err Http.NetworkError
+
+    Http.BadStatus_ { statusCode } _ ->
+      Err (Http.BadStatus statusCode)
+
+    Http.GoodStatus_ _ body ->
+      case Json.Decode.decodeString decoder body of
+        Err err ->
+          let _ = Debug.log "elm : json parse Error :" err in
+          Err (Http.BadBody body)
+
+        Ok result ->
+          Ok result
