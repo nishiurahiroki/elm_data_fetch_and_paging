@@ -9,11 +9,25 @@ const client = new Client({
 
 client.connect()
 
-const getTodos = ({ limit = '', page = '', sort = '', orderBy = '' }) => {
-  const queryStrings = [ 'SELECT * FROM TODO' ]
-  // TODO Use query parameter.
+const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) => {
+  const queryFromStrings = [ 'SELECT * FROM TODO' ]
+  const queryWhereStrings = []
+  const values = []
+
+  if(id) {
+    queryWhereStrings.push(` ${0 === queryWhereStrings.length ? 'WHERE' : ''} to_char(id, '99999') LIKE $1` )
+    values.push(`%${id}%`)
+  }
+
+  const query = {
+    name : 'fetch-todo',
+    text : queryFromStrings.join(' ') + ' ' +
+           queryWhereStrings.join(' '),
+    values
+  }
+
   return new Promise((resolve, reject) => {
-    client.query(queryStrings.join(' '), (err, res) => {
+    client.query(query, (err, res) => {
       resolve(err ? err.stack : res.rows)
       // client.end()
     })

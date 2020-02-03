@@ -42,16 +42,23 @@ type alias Model =
   {
     key : Nav.Key,
     url : Url.Url,
+    id : String,
     todoList : List Todo,
     fetchResult : Maybe String
   }
 
+
+type alias SearchCondition =
+  {
+    id : String
+  }
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
   ({
     key = key,
     url = url,
+    id = "",
     todoList = [],
     fetchResult = Nothing
   }, Cmd.batch [
@@ -63,7 +70,8 @@ type Msg =
   LinkClicked Browser.UrlRequest |
   UrlChanged Url.Url |
   GetTodoListTask |
-  GetTodoList (Result Http.Error ApiResult)
+  GetTodoList (Result Http.Error ApiResult) |
+  InputId String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -76,7 +84,12 @@ update msg model =
       (model, Cmd.none)
 
     GetTodoListTask ->
-      (model, Task.attempt GetTodoList fetchTodoTask)
+      let
+        searchCondition = {
+            id = model.id
+          }
+      in
+      (model, Task.attempt GetTodoList <| fetchTodoTask searchCondition)
 
     GetTodoList result ->
       case result of
@@ -90,13 +103,16 @@ update msg model =
               fetchResult = Nothing
           }, Cmd.none)
 
+    InputId id ->
+      ({model | id = id }, Cmd.none)
+
 
 view : Model -> Html Msg
 view model =
   div [] [
     div [] [
       text "TODO ID : ",
-      input [ type_ "input" ] []
+      input [ type_ "input", onInput InputId, value model.id ] []
     ],
     div [] [
       button [ onClick GetTodoListTask ] [ text "検索" ]
@@ -142,16 +158,21 @@ todoDecoder =
     (field "create_date" Json.Decode.string)
 
 
-fetchTodoTask : Task Http.Error ApiResult
-fetchTodoTask =
+fetchTodoTask : SearchCondition -> Task Http.Error ApiResult
+fetchTodoTask searchCondition =
   Http.task {
     method = "GET",
     headers = [],
-    url = "/api/v1/todo",
+    url = (++) "/api/v1/todo" <| queryString searchCondition,
     body = Http.emptyBody,
     resolver = Http.stringResolver <| handleJsonResponse <| apiReusltDecoder,
     timeout = Nothing
   }
+
+
+queryString : SearchCondition -> String
+queryString { id } =
+  "?id=" ++ id
 
 
 handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
