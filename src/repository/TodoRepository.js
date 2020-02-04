@@ -28,8 +28,12 @@ const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) =
 
   return new Promise((resolve, reject) => {
     client.query(query, (err, res) => {
-      resolve(err ? err.stack : res.rows)
-      // client.end()
+      if(err) {
+        reject(err.stack)
+        return
+      }
+      
+      resolve(res.rows)
     })
   })
 }
