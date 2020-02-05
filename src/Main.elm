@@ -43,6 +43,7 @@ type alias Model =
     key : Nav.Key,
     url : Url.Url,
     id : String,
+    limit : String,
     todoList : List Todo,
     fetchResult : Maybe String
   }
@@ -50,7 +51,8 @@ type alias Model =
 
 type alias SearchCondition =
   {
-    id : String
+    id : String,
+    limit : String
   }
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -60,6 +62,7 @@ init flags url key =
     url = url,
     id = "",
     todoList = [],
+    limit = "20",
     fetchResult = Nothing
   }, Cmd.batch [
     Cmd.none
@@ -71,7 +74,8 @@ type Msg =
   UrlChanged Url.Url |
   GetTodoListTask |
   GetTodoList (Result Http.Error ApiResult) |
-  InputId String
+  InputId String |
+  SelectLimit String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -86,7 +90,8 @@ update msg model =
     GetTodoListTask ->
       let
         searchCondition = {
-            id = model.id
+            id = model.id,
+            limit = model.limit
           }
       in
       (model, Task.attempt GetTodoList <| fetchTodoTask searchCondition)
@@ -106,6 +111,16 @@ update msg model =
     InputId id ->
       ({model | id = id }, Cmd.none)
 
+    SelectLimit limit ->
+      let
+        searchCondition = {
+            id = model.id,
+            limit = limit
+          }
+      in
+        ({model | limit = limit},
+          Task.attempt GetTodoList <| fetchTodoTask searchCondition
+        )
 
 view : Model -> Html Msg
 view model =
@@ -115,7 +130,13 @@ view model =
       input [ type_ "input", onInput InputId, value model.id ] []
     ],
     div [] [
-      button [ onClick GetTodoListTask ] [ text "検索" ]
+      button [ onClick GetTodoListTask ] [ text "検索" ],
+      select [ onChange SelectLimit, value model.limit ] [
+        option [ value "10" ] [ text "10" ],
+        option [ value "20" ] [ text "20" ],
+        option [ value "50"] [ text "50" ],
+        option [ value "100" ] [ text "100" ]
+      ]
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
     table [] [
@@ -171,9 +192,9 @@ fetchTodoTask searchCondition =
 
 
 queryString : SearchCondition -> String
-queryString { id } =
-  "?id=" ++ id
-
+queryString { id, limit } =
+     "?id=" ++ id ++
+     "&limit=" ++ limit
 
 handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
 handleJsonResponse decoder response =
@@ -198,3 +219,8 @@ handleJsonResponse decoder response =
 
         Ok result ->
           Ok result
+
+
+onChange : (String -> msg) -> Attribute msg
+onChange handler =
+  on "change" <| Json.Decode.map handler Html.Events.targetValue

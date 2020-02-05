@@ -12,6 +12,7 @@ client.connect()
 const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) => {
   const queryFromStrings = [ 'SELECT * FROM TODO' ]
   const queryWhereStrings = []
+  const queryLimitOffsetStrings = []
   const values = []
 
   if(id) {
@@ -19,10 +20,15 @@ const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) =
     values.push(`%${id}%`)
   }
 
+  if(limit) {
+    queryLimitOffsetStrings.push(` LIMIT ${limit} OFFSET 1 `) // TODO calc page.
+  }
+
   const query = {
     name : 'fetch-todo',
     text : queryFromStrings.join(' ') + ' ' +
-           queryWhereStrings.join(' '),
+           queryWhereStrings.join(' ') + ' ' +
+           queryLimitOffsetStrings.join(' '),
     values
   }
 
@@ -32,7 +38,7 @@ const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) =
         reject(err.stack)
         return
       }
-      
+
       resolve(res.rows)
     })
   })
