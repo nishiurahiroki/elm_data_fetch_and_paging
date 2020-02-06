@@ -38,6 +38,12 @@ type alias ApiResult =
     result : List Todo
   }
 
+type alias PagerCondition =
+  {
+    currentPage : Int,
+    totalPage : Int
+  }
+
 type alias Model =
   {
     key : Nav.Key,
@@ -136,7 +142,8 @@ view model =
         option [ value "20" ] [ text "20" ],
         option [ value "50"] [ text "50" ],
         option [ value "100" ] [ text "100" ]
-      ]
+      ],
+      viewPager { currentPage = 1, totalPage = 100 } -- TODO
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
     table [] [
@@ -157,6 +164,13 @@ view model =
     ]
   ]
 
+
+viewPager : PagerCondition -> Html Msg
+viewPager { currentPage, totalPage } = -- TODO
+  span []
+    <| List.append [ button [] [ text "←" ] ]
+    <| List.map (\page -> button [] [ text <| String.fromInt page ])
+    <| List.range 1 totalPage -- TODO
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
