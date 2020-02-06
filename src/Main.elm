@@ -167,10 +167,15 @@ view model =
 
 viewPager : PagerCondition -> Html Msg
 viewPager { currentPage, totalPage } = -- TODO
-  span []
-    <| List.append [ button [] [ text "←" ] ]
-    <| List.map (\page -> button [] [ text <| String.fromInt page ])
-    <| List.range 1 totalPage -- TODO
+  let
+    pageButtonList = List.map (\page -> button [] [ text <| String.fromInt page ])
+                        <| List.range 1 totalPage
+  in
+    span []
+      <| List.append [ button [] [ text "←" ] ]
+      <| List.append pageButtonList
+      <| [ button [] [ text "→" ] ] -- TODO
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
