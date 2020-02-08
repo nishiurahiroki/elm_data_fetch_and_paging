@@ -9,8 +9,8 @@ const client = new Client({
 
 client.connect()
 
-const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) => {
-  const queryFromStrings = [ 'SELECT * FROM TODO' ]
+const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) => {
+  const queryFromStrings = [ ` * ` ]
   const queryWhereStrings = []
   const queryLimitOffsetStrings = []
   const values = []
@@ -24,15 +24,20 @@ const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) =
     queryLimitOffsetStrings.push(` LIMIT ${limit} OFFSET 1 `) // TODO calc page.
   }
 
+  const text = 'SELECT ' +
+                 queryFromStrings.join(' ') + ' ' +
+                 ' FROM TODO ' +
+                 queryWhereStrings.join(' ') + ' ' +
+                 queryLimitOffsetStrings.join(' ')
+
+  console.log('Debug SQL : ',text)
   const query = {
     name : 'fetch-todo',
-    text : queryFromStrings.join(' ') + ' ' +
-           queryWhereStrings.join(' ') + ' ' +
-           queryLimitOffsetStrings.join(' '),
+    text,
     values
   }
 
-  return new Promise((resolve, reject) => {
+  const todos = await new Promise((resolve, reject) => {
     client.query(query, (err, res) => {
       if(err) {
         reject(err.stack)
@@ -42,6 +47,23 @@ const getTodos = ({ id = '', limit = '', page = '', sort = '', orderBy = '' }) =
       resolve(res.rows)
     })
   })
+
+  const totalCount await new Promise((resolve, reject) => {
+    client.query({
+      name : 'fetch-todo-total-count',
+      text : 'SELECT (*) AS total FROM TODO ' + queryWhereStrings.join(' '),
+      values
+    }, (err, res) => {
+      if(err) {
+        reject(err.stack)
+        return
+      }
+
+      resolve(res.rows[0].total)
+    })
+  })
+
+  return { todos, totalCount }
 }
 
 module.exports.getTodos = getTodos

@@ -10,9 +10,10 @@ app.use(bodyParser.json())
 const startServer = () => {
   app.get('/api/v1/todo', async (req, res) => {
     // TODO parameter
-    const todos = await getTodos({})
+    const { todos, totalCount } = await getTodos({})
     res.json({
-      result : todos
+      todos,
+      totalCount
     })
   })
 

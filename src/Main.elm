@@ -35,7 +35,8 @@ type alias Todo =
 
 type alias ApiResult =
   {
-    result : List Todo
+    todos : List Todo,
+    totalCount : Int
   }
 
 type alias PagerCondition =
@@ -113,7 +114,7 @@ update msg model =
         Ok fetchResult ->
           ({
             model |
-              todoList = fetchResult.result,
+              todoList = fetchResult.todos,
               fetchResult = Nothing
           }, Cmd.none)
 
@@ -198,8 +199,9 @@ subscriptions model =
 
 apiReusltDecoder : Decoder ApiResult
 apiReusltDecoder =
-  Json.Decode.map ApiResult
-    (field "result" <| Json.Decode.list todoDecoder)
+  Json.Decode.map2 ApiResult
+    (field "todos" <| Json.Decode.list todoDecoder)
+    (field "totalCount" Json.Decode.int)
 
 
 todoDecoder : Decoder Todo
