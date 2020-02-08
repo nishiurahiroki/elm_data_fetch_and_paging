@@ -168,7 +168,12 @@ view model =
 viewPager : PagerCondition -> Html Msg
 viewPager { currentPage, totalPage } = -- TODO
   let
-    pageButtonList = List.map (\page -> button [] [ text <| String.fromInt page ])
+    pageButtonList = List.map (\page ->
+                                  if currentPage == page then
+                                    button [ disabled True ] [ text <| String.fromInt page ]
+                                  else
+                                    button [] [ text <| String.fromInt page ]
+                              )
                         <| List.range 1 totalPage
   in
     span []
