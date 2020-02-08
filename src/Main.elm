@@ -51,7 +51,8 @@ type alias Model =
     id : String,
     limit : String,
     todoList : List Todo,
-    fetchResult : Maybe String
+    fetchResult : Maybe String,
+    currentPage : Int
   }
 
 
@@ -69,7 +70,8 @@ init flags url key =
     id = "",
     todoList = [],
     limit = "20",
-    fetchResult = Nothing
+    fetchResult = Nothing,
+    currentPage = 1
   }, Cmd.batch [
     Cmd.none
   ])
@@ -81,7 +83,8 @@ type Msg =
   GetTodoListTask |
   GetTodoList (Result Http.Error ApiResult) |
   InputId String |
-  SelectLimit String
+  SelectLimit String |
+  ClickPager Int
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -128,6 +131,9 @@ update msg model =
           Task.attempt GetTodoList <| fetchTodoTask searchCondition
         )
 
+    ClickPager page ->
+      ({ model | currentPage = page }, Cmd.none)
+
 view : Model -> Html Msg
 view model =
   div [] [
@@ -143,7 +149,7 @@ view model =
         option [ value "50"] [ text "50" ],
         option [ value "100" ] [ text "100" ]
       ],
-      viewPager { currentPage = 1, totalPage = 100 } -- TODO
+      viewPager { currentPage = model.currentPage, totalPage = 100 } -- TODO
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
     table [] [
@@ -170,9 +176,10 @@ viewPager { currentPage, totalPage } = -- TODO
   let
     pageButtonList = List.map (\page ->
                                   if currentPage == page then
-                                    button [ disabled True ] [ text <| String.fromInt page ]
+                                    button [ disabled True, onClick <| ClickPager page ] [ text
+                                      <| String.fromInt page ]
                                   else
-                                    button [] [ text <| String.fromInt page ]
+                                    button [ onClick <| ClickPager page ] [ text <| String.fromInt page ]
                               )
                         <| List.range 1 totalPage
   in
