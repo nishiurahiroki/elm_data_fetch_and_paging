@@ -201,9 +201,9 @@ viewPager { currentPage, totalPage } = -- TODO
                         <| List.range 1 totalPage
   in
     span []
-      <| List.append [ button [] [ text "←" ] ]
+      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1  ] [ text "←" ] ]
       <| List.append pageButtonList
-      <| [ button [] [ text "→" ] ] -- TODO
+      <| [ button [ onClick <| ClickPager <| (+) currentPage 1 ] [ text "→" ] ]
 
 
 subscriptions : Model -> Sub Msg
