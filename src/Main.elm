@@ -189,7 +189,7 @@ view model =
 
 
 viewPager : PagerCondition -> Html Msg
-viewPager { currentPage, totalPage } = -- TODO
+viewPager { currentPage, totalPage } =
   let
     pageButtonList = List.map (\page ->
                                   if currentPage == page then
@@ -201,9 +201,9 @@ viewPager { currentPage, totalPage } = -- TODO
                         <| List.range 1 totalPage
   in
     span []
-      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1  ] [ text "←" ] ]
+      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled <| if currentPage == 1 then True else False  ] [ text "←" ] ]
       <| List.append pageButtonList
-      <| [ button [ onClick <| ClickPager <| (+) currentPage 1 ] [ text "→" ] ]
+      <| [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled <| if currentPage == totalPage then True else False ] [ text "→" ] ]
 
 
 subscriptions : Model -> Sub Msg
