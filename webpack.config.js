@@ -63,10 +63,12 @@ module.exports = {
           app.use(bodyParser.urlencoded({ extended : true }))
           app.use(bodyParser.json())
           app.get('/api/v1/todo', async (req, res) => {
-            const { id, limit } = req.query
-            const todos = await getTodos({ id, limit })
+            const { id, limit, page } = req.query
+            const {todos, totalCount, totalPage} = await getTodos({ id, limit, page })
             res.json({
-              result : todos
+              todos,
+              totalCount,
+              totalPage
             })
           })
         }

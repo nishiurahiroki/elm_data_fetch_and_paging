@@ -62,7 +62,8 @@ type alias Model =
 type alias SearchCondition =
   {
     id : String,
-    limit : String
+    limit : String,
+    page : Int
   }
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -104,7 +105,8 @@ update msg model =
       let
         searchCondition = {
             id = model.id,
-            limit = model.limit
+            limit = model.limit,
+            page = model.currentPage
           }
       in
       (model, Task.attempt GetTodoList <| fetchTodoTask searchCondition)
@@ -118,7 +120,8 @@ update msg model =
           ({
             model |
               todoList = fetchResult.todos,
-              fetchResult = Nothing
+              fetchResult = Nothing,
+              totalPage = fetchResult.totalPage
           }, Cmd.none)
 
     InputId id ->
@@ -128,7 +131,8 @@ update msg model =
       let
         searchCondition = {
             id = model.id,
-            limit = limit
+            limit = limit,
+            page = model.currentPage
           }
       in
         ({model | limit = limit},
@@ -136,7 +140,16 @@ update msg model =
         )
 
     ClickPager page ->
-      ({ model | currentPage = page }, Cmd.none)
+      let
+        searchCondition = {
+            id = model.id,
+            limit = model.limit,
+            page = page
+          }
+      in
+        ({ model | currentPage = page },
+          Task.attempt GetTodoList <| fetchTodoTask searchCondition
+        )
 
 view : Model -> Html Msg
 view model =
@@ -153,7 +166,7 @@ view model =
         option [ value "50"] [ text "50" ],
         option [ value "100" ] [ text "100" ]
       ],
-      viewPager { currentPage = model.currentPage, totalPage = 100 } -- TODO
+      viewPager { currentPage = model.currentPage, totalPage = model.totalPage }
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
     table [] [
@@ -229,9 +242,10 @@ fetchTodoTask searchCondition =
 
 
 queryString : SearchCondition -> String
-queryString { id, limit } =
+queryString { id, limit, page } =
      "?id=" ++ id ++
-     "&limit=" ++ limit
+     "&limit=" ++ limit ++
+     "&page=" ++ String.fromInt page
 
 handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
 handleJsonResponse decoder response =
