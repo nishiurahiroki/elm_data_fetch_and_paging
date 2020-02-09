@@ -36,7 +36,8 @@ type alias Todo =
 type alias ApiResult =
   {
     todos : List Todo,
-    totalCount : Int
+    totalCount : Int,
+    totalPage : Int
   }
 
 type alias PagerCondition =
@@ -53,7 +54,8 @@ type alias Model =
     limit : String,
     todoList : List Todo,
     fetchResult : Maybe String,
-    currentPage : Int
+    currentPage : Int,
+    totalPage : Int
   }
 
 
@@ -72,7 +74,8 @@ init flags url key =
     todoList = [],
     limit = "20",
     fetchResult = Nothing,
-    currentPage = 1
+    currentPage = 1,
+    totalPage = 0
   }, Cmd.batch [
     Cmd.none
   ])
@@ -199,9 +202,10 @@ subscriptions model =
 
 apiReusltDecoder : Decoder ApiResult
 apiReusltDecoder =
-  Json.Decode.map2 ApiResult
+  Json.Decode.map3 ApiResult
     (field "todos" <| Json.Decode.list todoDecoder)
     (field "totalCount" Json.Decode.int)
+    (field "totalPage" Json.Decode.int)
 
 
 todoDecoder : Decoder Todo

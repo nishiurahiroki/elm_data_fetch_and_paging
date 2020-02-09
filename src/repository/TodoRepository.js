@@ -48,7 +48,7 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
     })
   })
 
-  const totalCount await new Promise((resolve, reject) => {
+  const totalCount = await new Promise((resolve, reject) => {
     client.query({
       name : 'fetch-todo-total-count',
       text : 'SELECT (*) AS total FROM TODO ' + queryWhereStrings.join(' '),
@@ -63,7 +63,9 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
     })
   })
 
-  return { todos, totalCount }
+  const totalPage = Math.floor(totalCount / limit)
+
+  return { todos, totalCount, totalPage }
 }
 
 module.exports.getTodos = getTodos
