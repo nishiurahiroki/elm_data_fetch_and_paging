@@ -277,7 +277,7 @@ fetchTodoTask searchCondition =
     headers = [],
     url = (++) "/api/v1/todo" <| queryString searchCondition,
     body = Http.emptyBody,
-    resolver = Http.stringResolver <| handleJsonResponse <| apiReusltDecoder,
+    resolver = Http.stringResolver <| handleJsonResponse apiReusltDecoder,
     timeout = Nothing
   }
 
