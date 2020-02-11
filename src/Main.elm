@@ -9,6 +9,8 @@ import Url
 import Http
 import Json.Decode exposing (Decoder, field)
 import Task exposing (Task)
+import Url.Parser exposing (Parser, (</>), (<?>),  int, map, oneOf, s, string, top)
+import Url.Parser.Query as Query
 
 
 main : Program () Model Msg
@@ -82,6 +84,16 @@ init flags url key =
   ])
 
 
+type Route =
+  Search (Maybe String) (Maybe String) (Maybe Int)
+
+routeParser : Parser (Route -> a) a
+routeParser =
+  oneOf [
+    Url.Parser.map Search (top <?> Query.string "id" <?> Query.string "limit" <?> Query.int "page")
+  ]
+
+
 type Msg =
   LinkClicked Browser.UrlRequest |
   UrlChanged Url.Url |
@@ -99,17 +111,42 @@ update msg model =
       (model, Cmd.none)
 
     UrlChanged url ->
-      (model, Cmd.none)
+      case Url.Parser.parse routeParser url of
+        Just route ->
+          case route of
+              Search id limit page ->
+                let
+                  searchCondition = {
+                      id = Maybe.withDefault "" id,
+                      limit = Maybe.withDefault "" limit,
+                      page = Maybe.withDefault 1 <| page
+                    }
+                in
+                  ({model |
+                      id = Maybe.withDefault "" id,
+                      limit = Maybe.withDefault "" limit,
+                      currentPage = Maybe.withDefault 1 <| page
+                    },
+                    Task.attempt GetTodoList <| fetchTodoTask searchCondition
+                  )
+
+        Nothing->
+          (model, Cmd.none)
 
     GetTodoListTask ->
       let
+        limit = if String.isEmpty model.limit then "20" else model.limit
         searchCondition = {
             id = model.id,
-            limit = model.limit,
-            page = model.currentPage
+            limit = limit,
+            page = 1
           }
       in
-      (model, Task.attempt GetTodoList <| fetchTodoTask searchCondition)
+      ({model | limit = limit},
+        Cmd.batch [
+          Nav.pushUrl model.key <| queryString searchCondition
+        ]
+      )
 
     GetTodoList result ->
       case result of
@@ -132,11 +169,13 @@ update msg model =
         searchCondition = {
             id = model.id,
             limit = limit,
-            page = model.currentPage
+            page = 1
           }
       in
-        ({model | limit = limit},
-          Task.attempt GetTodoList <| fetchTodoTask searchCondition
+        ({model | limit = limit, currentPage = 1},
+            Cmd.batch [
+              Nav.pushUrl model.key <| queryString searchCondition
+            ]
         )
 
     ClickPager page ->
@@ -148,7 +187,9 @@ update msg model =
           }
       in
         ({ model | currentPage = page },
-          Task.attempt GetTodoList <| fetchTodoTask searchCondition
+          Cmd.batch [
+            Nav.pushUrl model.key <| queryString searchCondition
+          ]
         )
 
 view : Model -> Html Msg
