@@ -45,7 +45,7 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
   })
 
 
-  const totalCount = await new Promise((resolve, reject) => {
+  const {totalCount, totalPage} = await new Promise((resolve, reject) => {
     client.query('SELECT COUNT(*) AS total FROM TODO ' + queryWhereStrings.join(' '),
       values, (err, res) => {
         if(err) {
@@ -53,11 +53,12 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
           return
         }
 
-        resolve(res.rows[0].total)
+        resolve({
+          totalCount : res.rows[0].total,
+          totalPage : Math.floor(res.rows[0].total / limit)
+        })
     })
   })
-
-  const totalPage = Math.floor(totalCount / limit)
 
   return { todos, totalCount : Number(totalCount), totalPage }
 }
