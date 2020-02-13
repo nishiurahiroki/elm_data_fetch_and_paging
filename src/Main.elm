@@ -240,12 +240,15 @@ viewPager { currentPage, totalPage } =
                                     button [ onClick <| ClickPager page ] [ text <| String.fromInt page ]
                               )
                         <| List.range 1 totalPage
+    isFirstPage = (==) currentPage 1
+    isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
   in
     span []
-      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled <| (==) currentPage 1 ] [ text "←" ] ]
+      <| List.append [ button [ onClick <| ClickPager 1, disabled isFirstPage ] [ text "<<" ] ]
+      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled isFirstPage ] [ text "←" ] ]
       <| List.append pageButtonList
-      <| [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage ] [ text "→" ] ]
-
+      <| List.append [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text "→" ] ]
+      <| [ button [ onClick <| ClickPager totalPage, disabled isLastPage ] [ text ">>" ] ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
