@@ -54,13 +54,13 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
         }
 
         resolve({
-          totalCount : res.rows[0].total,
+          totalCount : Number(res.rows[0].total),
           totalPage : Math.floor(res.rows[0].total / limit)
         })
     })
   })
 
-  return { todos, totalCount : Number(totalCount), totalPage }
+  return { todos, totalCount, totalPage }
 }
 
 module.exports.getTodos = getTodos
