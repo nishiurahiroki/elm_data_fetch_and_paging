@@ -217,7 +217,8 @@ view model =
         pageRangeDisplayed = 2,
         customPreviousLabel = Nothing,
         customNextLabel = Nothing,
-        customPageRangeLabel = Nothing
+        customPageRangeLabel = Nothing,
+        onChangePage = ClickPager
       }
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
@@ -240,29 +241,40 @@ view model =
   ]
 
 
-viewPager : PagerCondition -> Html Msg
+viewPager :
+  {
+    currentPage : Int,
+    totalPage : Int,
+    pageRangeDisplayed : Int,
+    customPreviousLabel : Maybe String,
+    customNextLabel : Maybe String,
+    customPageRangeLabel : Maybe String,
+    onChangePage : Int -> msg
+  } -> Html msg
 viewPager {
-  currentPage,
-  totalPage,
-  pageRangeDisplayed, -- TODO
-  customNextLabel,
-  customPreviousLabel,
-  customPageRangeLabel} = -- TODO
-  let
-    pageButtonList = List.map (\page ->
-                                  if currentPage == page then
-                                    button [ disabled True, onClick <| ClickPager page ] [ text <| String.fromInt page ]
-                                  else
-                                    button [ onClick <| ClickPager page ] [ text <| String.fromInt page ]
-                              )
-                        <| List.range 1 totalPage
-    isFirstPage = (==) currentPage 1
-    isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
-  in
-    span []
-      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
-      <| List.append pageButtonList
-      <| List.singleton (button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
+    currentPage,
+    totalPage,
+    pageRangeDisplayed, -- TODO
+    customNextLabel,
+    customPreviousLabel,
+    customPageRangeLabel, -- TODO
+    onChangePage
+  } =
+    let
+      pageButtonList = List.map (\page ->
+                                    if currentPage == page then
+                                      button [ disabled True, onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                    else
+                                      button [ onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                )
+                          <| List.range 1 totalPage
+      isFirstPage = (==) currentPage 1
+      isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
+    in
+      span []
+        <| List.append [ button [ onClick <| onChangePage <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
+        <| List.append pageButtonList
+        <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
 subscriptions : Model -> Sub Msg
