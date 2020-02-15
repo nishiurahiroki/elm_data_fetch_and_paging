@@ -146,11 +146,11 @@ update msg model =
             page = 1
           }
       in
-      ({model | limit = limit},
-        Cmd.batch [
-          Nav.pushUrl model.key <| queryString searchCondition
-        ]
-      )
+        ({model | limit = limit},
+          Cmd.batch [
+            Nav.pushUrl model.key <| queryString searchCondition
+          ]
+        )
 
     GetTodoList result ->
       case result of
