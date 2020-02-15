@@ -264,6 +264,7 @@ viewPager {
       <| List.append pageButtonList
       <| [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ] ]
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch [
@@ -304,6 +305,7 @@ queryString { id, limit, page } =
      "?id=" ++ id ++
      "&limit=" ++ limit ++
      "&page=" ++ String.fromInt page
+
 
 handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
 handleJsonResponse decoder response =
