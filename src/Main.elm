@@ -234,8 +234,7 @@ viewPager { currentPage, totalPage } =
   let
     pageButtonList = List.map (\page ->
                                   if currentPage == page then
-                                    button [ disabled True, onClick <| ClickPager page ] [ text
-                                      <| String.fromInt page ]
+                                    button [ disabled True, onClick <| ClickPager page ] [ text <| String.fromInt page ]
                                   else
                                     button [ onClick <| ClickPager page ] [ text <| String.fromInt page ]
                               )
