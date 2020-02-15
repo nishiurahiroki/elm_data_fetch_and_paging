@@ -262,7 +262,7 @@ viewPager {
     span []
       <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
       <| List.append pageButtonList
-      <| [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ] ]
+      <| List.singleton (button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
 subscriptions : Model -> Sub Msg
