@@ -13,12 +13,12 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
   const queryFromStrings = [ ` * ` ]
   const queryWhereStrings = []
   const queryLimitOffsetStrings = []
-  
+
   const values = []
 
   if(id) {
-    queryWhereStrings.push(` ${0 === queryWhereStrings.length ? 'WHERE' : ''} to_char(id, '99999') LIKE $1` )
     values.push(`%${id}%`)
+    queryWhereStrings.push(` ${0 === queryWhereStrings.length ? 'WHERE' : ''} to_char(id, '99999') LIKE $${values.length}` )
   }
 
   if(limit) {
