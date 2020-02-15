@@ -45,7 +45,11 @@ type alias ApiResult =
 type alias PagerCondition =
   {
     currentPage : Int,
-    totalPage : Int
+    totalPage : Int,
+    pageRangeDisplayed : Int,
+    customPreviousLabel : Maybe String,
+    customNextLabel : Maybe String,
+    customPageRangeLabel : Maybe String
   }
 
 type alias Model =
@@ -207,7 +211,14 @@ view model =
         option [ value "50"] [ text "50" ],
         option [ value "100" ] [ text "100" ]
       ],
-      viewPager { currentPage = model.currentPage, totalPage = model.totalPage }
+      viewPager {
+        currentPage = model.currentPage,
+        totalPage = model.totalPage,
+        pageRangeDisplayed = 2,
+        customPreviousLabel = Nothing,
+        customNextLabel = Nothing,
+        customPageRangeLabel = Nothing
+      }
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
     table [] [
@@ -230,7 +241,13 @@ view model =
 
 
 viewPager : PagerCondition -> Html Msg
-viewPager { currentPage, totalPage } =
+viewPager {
+  currentPage,
+  totalPage,
+  pageRangeDisplayed, -- TODO
+  customNextLabel,
+  customPreviousLabel,
+  customPageRangeLabel} = -- TODO
   let
     pageButtonList = List.map (\page ->
                                   if currentPage == page then
@@ -243,11 +260,9 @@ viewPager { currentPage, totalPage } =
     isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
   in
     span []
-      <| List.append [ button [ onClick <| ClickPager 1, disabled isFirstPage ] [ text "<<" ] ]
-      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled isFirstPage ] [ text "←" ] ]
+      <| List.append [ button [ onClick <| ClickPager <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
       <| List.append pageButtonList
-      <| List.append [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text "→" ] ]
-      <| [ button [ onClick <| ClickPager totalPage, disabled isLastPage ] [ text ">>" ] ]
+      <| [ button [ onClick <| ClickPager <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ] ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
