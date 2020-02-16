@@ -26,16 +26,16 @@ const getTodos = async ({ id = '', limit = '', page = '', sort = '', orderBy = '
     queryLimitOffsetStrings.push(` LIMIT ${limit} OFFSET ${offset} `) // TODO calc page.
   }
 
-  const text = 'SELECT ' +
-                 queryFromStrings.join(' ') + ' ' +
-                 ' FROM TODO ' +
-                 queryWhereStrings.join(' ') + ' ' +
-                 queryLimitOffsetStrings.join(' ')
+  const getTodoQuery = 'SELECT ' +
+                         queryFromStrings.join(' ') + ' ' +
+                         ' FROM TODO ' +
+                         queryWhereStrings.join(' ') + ' ' +
+                         queryLimitOffsetStrings.join(' ')
 
-  console.log('Debug SQL : ',text)
+  console.log('Debug SQL : ', getTodoQuery)
 
   const todos = await new Promise((resolve, reject) => {
-    client.query(text, values, (err, res) => {
+    client.query(getTodoQuery, values, (err, res) => {
       if(err) {
         reject(err.stack)
         return
