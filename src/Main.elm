@@ -277,13 +277,6 @@ viewPager {
         <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.batch [
-    Sub.none
-  ]
-
-
 apiReusltDecoder : Decoder ApiResult
 apiReusltDecoder =
   Json.Decode.map3 ApiResult
@@ -347,3 +340,10 @@ handleJsonResponse decoder response =
 onChange : (String -> msg) -> Attribute msg
 onChange handler =
   on "change" <| Json.Decode.map handler Html.Events.targetValue
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.batch [
+    Sub.none
+  ]
