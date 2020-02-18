@@ -11,7 +11,7 @@ import Json.Decode exposing (Decoder, field)
 import Task exposing (Task)
 import Url.Parser exposing (Parser, (</>), (<?>),  int, map, oneOf, s, string, top)
 import Url.Parser.Query as Query
-
+import List.Extra as ListEx
 
 main : Program () Model Msg
 main =
@@ -268,12 +268,25 @@ viewPager {
                                       button [ onClick <| onChangePage page ] [ text <| String.fromInt page ]
                                 )
                           <| List.range 1 totalPage
+      firstButtonList  = List.take pageRangeDisplayed -- TODO current move selected.
+                               <| pageButtonList
+      secondButtonList = List.take pageRangeDisplayed
+                               <| List.reverse pageButtonList
+
+      buttonTotalCount = (List.length firstButtonList) + (List.length secondButtonList)
+      betweenText = if buttonTotalCount < totalPage then
+                        text "..."
+                    else
+                        text ""
+
       isFirstPage = (==) currentPage 1
       isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
     in
       span []
         <| List.append [ button [ onClick <| onChangePage <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
-        <| List.append pageButtonList
+        <| List.append firstButtonList
+        <| List.append [ betweenText ]
+        <| List.append secondButtonList
         <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
