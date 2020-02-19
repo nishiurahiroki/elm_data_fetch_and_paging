@@ -254,40 +254,39 @@ viewPager :
 viewPager {
     currentPage,
     totalPage,
-    pageRangeDisplayed, -- TODO
+    pageRangeDisplayed,
     customNextLabel,
     customPreviousLabel,
-    customPageRangeLabel, -- TODO
+    customPageRangeLabel,
     onChangePage
   } =
     let
-      pageButtonList = List.map (\page ->
-                                    if currentPage == page then
-                                      button [ disabled True, onClick <| onChangePage page ] [ text <| String.fromInt page ]
-                                    else
-                                      button [ onClick <| onChangePage page ] [ text <| String.fromInt page ]
-                                )
-                          <| List.range 1 totalPage
-      firstButtonList  = List.take pageRangeDisplayed -- TODO current move selected.
-                               <| pageButtonList
-      secondButtonList = List.take pageRangeDisplayed
-                               <| List.reverse pageButtonList
-
-      buttonTotalCount = (List.length firstButtonList) + (List.length secondButtonList)
-      betweenText = if buttonTotalCount < totalPage then
-                        text "..."
-                    else
-                        text ""
-
-      isFirstPage = (==) currentPage 1
-      isLastPage = (||) (totalPage < 1) <| (==) currentPage totalPage
+      pageButtonList = List.range 1 totalPage
+                        |> List.map (\page ->
+                                        if (page <= (currentPage + pageRangeDisplayed) && page >= (currentPage - pageRangeDisplayed)) ||
+                                           page <= (1 + pageRangeDisplayed) ||
+                                           page >= (totalPage - pageRangeDisplayed) then page
+                                        else if page > (currentPage + pageRangeDisplayed) then
+                                          -1
+                                        else if page < (currentPage - pageRangeDisplayed) then
+                                          -2
+                                        else
+                                          -1
+                                    )
+                        |> ListEx.unique
+                        |> List.map (\page ->
+                                        if -1 == page || -2 == page then
+                                          text "..."
+                                        else if currentPage == page then
+                                          button [ disabled True, onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                        else
+                                          button [ onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                    )
     in
       span []
-        <| List.append [ button [ onClick <| onChangePage <| (-) currentPage 1, disabled isFirstPage ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
-        <| List.append firstButtonList
-        <| List.append [ betweenText ]
-        <| List.append secondButtonList
-        <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled isLastPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
+        <| List.append [ button [ onClick <| onChangePage <| (-) currentPage 1, disabled <| (==) currentPage 1 ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
+        <| List.append pageButtonList
+        <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
 apiReusltDecoder : Decoder ApiResult
