@@ -264,8 +264,9 @@ viewPager {
       pageButtonList = List.range 1 totalPage
                         |> List.map (\page ->
                                         if (page <= (currentPage + pageRangeDisplayed) && page >= (currentPage - pageRangeDisplayed)) ||
-                                           page <= (1 + pageRangeDisplayed) ||
-                                           page >= (totalPage - pageRangeDisplayed) then page
+                                            page <= (1 + pageRangeDisplayed) ||
+                                            page >= (totalPage - pageRangeDisplayed) then 
+                                          page
                                         else if page > (currentPage + pageRangeDisplayed) then
                                           -1
                                         else if page < (currentPage - pageRangeDisplayed) then
