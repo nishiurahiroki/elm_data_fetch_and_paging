@@ -218,7 +218,7 @@ view model =
         customPreviousLabel = Nothing,
         customNextLabel = Nothing,
         customPageRangeLabel = Nothing,
-        onChangePage = ClickPager
+        clickPager = ClickPager
       }
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,
@@ -249,7 +249,7 @@ viewPager :
     customPreviousLabel : Maybe String,
     customNextLabel : Maybe String,
     customPageRangeLabel : Maybe String,
-    onChangePage : Int -> msg
+    clickPager : Int -> msg
   } -> Html msg
 viewPager {
     currentPage,
@@ -258,14 +258,14 @@ viewPager {
     customNextLabel,
     customPreviousLabel,
     customPageRangeLabel,
-    onChangePage
+    clickPager
   } =
     let
       pageButtonList = List.range 1 totalPage
                         |> List.map (\page ->
                                         if (page <= (currentPage + pageRangeDisplayed) && page >= (currentPage - pageRangeDisplayed)) ||
                                             page <= (1 + pageRangeDisplayed) ||
-                                            page >= (totalPage - pageRangeDisplayed) then 
+                                            page >= (totalPage - pageRangeDisplayed) then
                                           page
                                         else if page > (currentPage + pageRangeDisplayed) then
                                           -1
@@ -279,15 +279,15 @@ viewPager {
                                         if -1 == page || -2 == page then
                                           text "..."
                                         else if currentPage == page then
-                                          button [ disabled True, onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                          button [ disabled True, onClick <| clickPager page ] [ text <| String.fromInt page ]
                                         else
-                                          button [ onClick <| onChangePage page ] [ text <| String.fromInt page ]
+                                          button [ onClick <| clickPager page ] [ text <| String.fromInt page ]
                                     )
     in
       span []
-        <| List.append [ button [ onClick <| onChangePage <| (-) currentPage 1, disabled <| (==) currentPage 1 ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
+        <| List.append [ button [ onClick <| clickPager <| (-) currentPage 1, disabled <| (==) currentPage 1 ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
         <| List.append pageButtonList
-        <| List.singleton (button [ onClick <| onChangePage <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
+        <| List.singleton (button [ onClick <| clickPager <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage ] [ text <| Maybe.withDefault "→" customNextLabel ])
 
 
 apiReusltDecoder : Decoder ApiResult
