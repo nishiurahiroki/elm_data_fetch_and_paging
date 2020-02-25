@@ -218,6 +218,7 @@ view model =
         customPreviousLabel = Nothing,
         customNextLabel = Nothing,
         customPageRangeLabel = Nothing,
+        breakLabel = Nothing,
         clickPager = ClickPager
       }
     ],
@@ -249,6 +250,7 @@ viewPager :
     customPreviousLabel : Maybe String,
     customNextLabel : Maybe String,
     customPageRangeLabel : Maybe String,
+    breakLabel : Maybe String,
     clickPager : Int -> msg
   } -> Html msg
 viewPager {
@@ -258,6 +260,7 @@ viewPager {
     customNextLabel,
     customPreviousLabel,
     customPageRangeLabel,
+    breakLabel,
     clickPager
   } =
     let
@@ -277,7 +280,7 @@ viewPager {
                         |> ListEx.unique
                         |> List.map (\page ->
                                         if -1 == page || -2 == page then
-                                          text "..."
+                                          text <| Maybe.withDefault "..." breakLabel
                                         else if currentPage == page then
                                           button [ disabled True, onClick <| clickPager page ] [ text <| String.fromInt page ]
                                         else
