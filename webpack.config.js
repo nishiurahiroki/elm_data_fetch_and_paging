@@ -68,7 +68,7 @@ module.exports = {
             res.json({
               todos,
               totalCount,
-              totalPage
+              totalPage,
             })
           })
         }
