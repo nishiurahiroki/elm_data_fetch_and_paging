@@ -275,12 +275,14 @@ viewPager {
                                         else if page < (currentPage - pageRangeDisplayed) then
                                           -2
                                         else
-                                          -1
+                                          -9
                                     )
                         |> ListEx.unique
                         |> List.map (\page ->
                                         if -1 == page || -2 == page then
                                           text <| Maybe.withDefault "..." breakLabel
+                                        else if -9 == page then
+                                          text ""
                                         else if currentPage == page then
                                           button [ disabled True, onClick <| clickPager page ] [ text <| String.fromInt page ]
                                         else
