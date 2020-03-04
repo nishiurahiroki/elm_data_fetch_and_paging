@@ -223,7 +223,7 @@ view model =
         previousClassName = Nothing,
         nextClassName = Nothing,
         breakClassName = Nothing,
-        clickPager = ClickPager
+        onClickPager = ClickPager
       }
     ],
     text <| Maybe.withDefault "" <| model.fetchResult,

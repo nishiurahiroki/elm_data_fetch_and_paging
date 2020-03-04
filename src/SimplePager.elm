@@ -19,7 +19,7 @@ viewPager :
     previousClassName : Maybe String,
     nextClassName : Maybe String,
     breakClassName : Maybe String,
-    clickPager : Int -> msg
+    onClickPager : Int -> msg
   } -> Html msg
 viewPager
   {
@@ -30,7 +30,7 @@ viewPager
     customPreviousLabel,
     customPageRangeLabel,
     breakLabel,
-    clickPager,
+    onClickPager,
     pageClassName,
     previousClassName,
     nextClassName,
@@ -57,12 +57,12 @@ viewPager
                                         else if -9 == page then
                                           text ""
                                         else if currentPage == page then
-                                          button [ disabled True, onClick <| clickPager page, class <| Maybe.withDefault "" pageClassName ] [ text <| String.fromInt page ]
+                                          button [ disabled True, onClick <| onClickPager page, class <| Maybe.withDefault "" pageClassName ] [ text <| String.fromInt page ]
                                         else
-                                          button [ onClick <| clickPager page, class <| Maybe.withDefault "" pageClassName ] [ text <| String.fromInt page ]
+                                          button [ onClick <| onClickPager page, class <| Maybe.withDefault "" pageClassName ] [ text <| String.fromInt page ]
                                     )
     in
       span []
-        <| List.append [ button [ onClick <| clickPager <| (-) currentPage 1, disabled <| (==) currentPage 1, class <| Maybe.withDefault "" previousClassName ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
+        <| List.append [ button [ onClick <| onClickPager <| (-) currentPage 1, disabled <| (==) currentPage 1, class <| Maybe.withDefault "" previousClassName ] [ text <| Maybe.withDefault "←" customPreviousLabel ] ]
         <| List.append pageButtonList
-        <| List.singleton (button [ onClick <| clickPager <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage, class <| Maybe.withDefault "" nextClassName ] [ text <| Maybe.withDefault "→" customNextLabel ])
+        <| List.singleton (button [ onClick <| onClickPager <| (+) currentPage 1, disabled <| (||) (totalPage < 1) <| (==) currentPage totalPage, class <| Maybe.withDefault "" nextClassName ] [ text <| Maybe.withDefault "→" customNextLabel ])
