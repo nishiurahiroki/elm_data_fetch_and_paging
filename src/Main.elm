@@ -219,6 +219,10 @@ view model =
         customNextLabel = Nothing,
         customPageRangeLabel = Nothing,
         breakLabel = Nothing,
+        pageClassName = Nothing,
+        previousClassName = Nothing,
+        nextClassName = Nothing,
+        breakClassName = Nothing,
         clickPager = ClickPager
       }
     ],
